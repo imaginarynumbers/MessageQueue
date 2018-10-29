@@ -16,5 +16,17 @@ using namespace std;
 
 int main()
 {
+    int qid = msgget(ftok(".",'u'), 0); //pulls from the message queue
+    
+    // message buffer struct
+    struct buf {
+        long mtype;
+        char greeting[50];
+    };
+    
+    buf msg;
+    int size = sizeof(msg)-sizeof(long);
+    //--------------------------------------
+    
     
 }
