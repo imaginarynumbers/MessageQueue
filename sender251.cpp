@@ -34,7 +34,7 @@ int main() {
     
     // Last message through patch, to receiver1
     strcpy(msg.greeting, "Terminate process sender251 to receiver1");
-	msg.mtype = 99;
+	msg.mtype = 100;
 	get_info(qid, (struct msgbuf *)&msg, size, 300);
     
     // Initiate Sender 251
@@ -54,13 +54,13 @@ int main() {
         
 		msgsnd(qid, (struct msgbuf *)&msg, size, 0);
 		
-		totalMessages++;			//increment counter
+		totalMessages++;			
         cout << "Message " << totalMessages << " has been sent, value sent: " << randomNumber << endl;
 				
 	}
     
     // send terminating message to sender997
-    msg.mtype = 702;
+    msg.mtype = 700;
     strcpy(msg.greeting, "Terminated receiver1");
     msgsnd(qid, (struct msgbuf *)&msg, size, 0);
     
