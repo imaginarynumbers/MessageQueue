@@ -32,7 +32,7 @@ int main() {
     
 	int size = sizeof(msg) - sizeof(long);
     
-    // Last message to patch, to receiver1
+    // Last message through patch, to receiver1
     strcpy(msg.greeting, "Terminate process sender251 to receiver1");
 	msg.mtype = 99;
 	get_info(qid, (struct msgbuf *)&msg, size, 300);
@@ -40,8 +40,7 @@ int main() {
     // Initiate Sender 251
     cout << getpid() << "Sender 251 ready!" << endl;
 	
-//    msgrcv(qid, (struct msgbuf *)&msg, size, 252, 0); //get message to begin from receiver1
-	int totalMessages = 0;				//counts the messages
+	int totalMessages = 0;				
     
     srand(time(NULL));
     int randomNumber;
@@ -65,7 +64,7 @@ int main() {
     strcpy(msg.greeting, "Terminated receiver1");
     msgsnd(qid, (struct msgbuf *)&msg, size, 0);
     
-    // Terminate sender251
+    // terminate sender251
 	cout << getpid() << " (Sender251): now exits" << endl;
 	exit(0);
 }
