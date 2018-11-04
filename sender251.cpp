@@ -64,7 +64,7 @@ int main() {
     strcpy(msg.greeting, "Terminated receiver1");
     msgsnd(qid, (struct msgbuf *)&msg, size, 0);
     
-    // terminate sender251
+    // terminate sender251  
 	cout << getpid() << " (Sender251): now exits" << endl;
 	exit(0);
 }
