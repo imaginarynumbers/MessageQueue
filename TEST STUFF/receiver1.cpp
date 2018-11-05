@@ -23,6 +23,7 @@ int main()
     {
         long mtype; //message type
         char greeting[50];
+        int sid;
     };
     
     buf msg;
@@ -42,18 +43,24 @@ int main()
         msg.mtype = 110;
         strcpy(msg.greeting," 1 says Go 997");
         msgsnd(qid, (struct buf *)&msg, size, 0);
+        cout<< "Awaiting message from r2" << endl;
+        msgrcv(qid, (struct buf *)&msg, size,222,0);//receive message from r2
     }
     
     while(!send997and251)
     {
         msgrcv(qid, (struct buf *)&msg, size, 251, 0);
-        cout << "Message received: " << getpid() << msg.greeting << endl;
-        
+        cout << "Message received: "<< msg.greeting << endl;
+                
         if(msg.greeting[0] == 'T'){
             counter++;
         }
         if(counter == 2){
             send997and251 = true;
+            msg.mtype = 405;
+            msgsnd(qid,(struct buf *)&msg,size,0);
+            msg.mtype = 661;
+            msgsnd(qid,(struct buf *)&msg,size,0);
         }
         
     }

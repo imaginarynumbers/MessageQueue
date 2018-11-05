@@ -28,6 +28,7 @@ int main() {
     struct buf {
         long mtype;
         char greeting[50];
+        int sid;
     } msg;      // buf object 'msg'
 
     int size = sizeof(msg) - sizeof(long);
@@ -45,16 +46,24 @@ int main() {
     
     srand(time(NULL));
     int randomNumber;
-
+    //waits for r2
+    msgrcv(qid, (struct buf *)&msg,size,21,0);
     while (true){
-        
-        // generate random number for message
-        do {
-            randomNumber = rand() * INT_MAX;
-        } while (randomNumber % 251 != 0);
-        
+        msg.mtype = 251;
+        msg.sid = 251;
+        strcpy(msg.greeting,"251 says hi");
         msgsnd(qid, (struct msgbuf *)&msg, size, 0);
-        
+
+        randomNumber = rand() * INT_MAX;
+        if (randomNumber % 251 == 0){
+            msg.mtype = 251;
+            msg.sid = 251;
+            strcpy(msg.greeting,"T");
+            msgsnd(qid, (struct buf *)&msg, size, 0);
+            msgrcv(qid, (struct buf *)&msg, size,661, 0);
+            break;
+        }
+
         totalMessages++;
         cout << "Message " << totalMessages << " has been sent, value sent: " << randomNumber << endl;
         

@@ -23,7 +23,9 @@ int main() {
     struct buf {
 		long mtype;
 		char greeting[50];
+        int sid;
 	};
+    
 	//initialize struct and size
     buf msg;
 	int size = sizeof(msg)-sizeof(long);
@@ -31,13 +33,21 @@ int main() {
     //await message from sender 997
 	cout << qid << " : RECEIVER 2 awaiting response" << endl;
     msgrcv(qid, (struct buf *)&msg,size,997,0);
+    cout << qid << " Rec 2 got 997" << endl;
     
     //check message from 997
     if(msg.greeting[0] == 'A'){
         cout << qid << " : RECEIVER 2 got 997 message, beggining execution" << endl;
-        msg.mtype = 210;
+        msg.mtype = 222;//message for r1
+        msgsnd(qid, (struct buf *)&msg,size,0);
+        msg.mtype = 21;// starter message for sender
+        msgsnd(qid, (struct buf *)&msg,size,0);
+        msg.mtype = 21;//starter message for sender
+        msgsnd(qid, (struct buf *)&msg,size,0);
+        msg.mtype = 210;//acknowledgement for 997
         strcpy(msg.greeting," 2 says Go 997");
         msgsnd(qid, (struct buf *)&msg, size, 0);
+
     }
     
     
@@ -46,19 +56,27 @@ int main() {
         cout << qid <<" : Receiver2 Looping" << endl;
         //receive from 257
         msgrcv(qid, (struct buf *)&msg, size,257,0);
-        if( msg.greeting[0] == '2'){
+        if( msg.sid == 257){
             cout << "Message from 257: " << msg.greeting << endl;
+            if (msg.greeting[0] == 'T'){
+                msg.mtype = 667;
+                msgsnd(qid, (struct buf *)&msg,size,0);
+            }
+        }
+        if (msg.sid == 997){
+            cout << "Message from 997: " <<msg.greeting<< endl;
+            
+            if( msg.greeting[0] == 'T'){
+                cout<< "997 needs to terminate, sending it to the END BOYS"<< endl;
+                strcpy(msg.greeting,"Goodbye 997");
+                
+                msg.mtype = 777;
+                msgsnd(qid,(struct buf *)&msg, size, 0);
+                }
+
         }
         //receive from 997
-        msgrcv(qid, (struct buf *)&msg, size, 997,0 );
-        cout << "Message Received from 997" << endl;
-        if( msg.greeting[0] == 'T'){
-            cout<< "997 needs to terminate, sending it to the END BOYS"<< endl;
-            strcpy(msg.greeting,"Goodbye 997");
-            msg.mtype = 405;
-            msgsnd(qid,(struct buf *)&msg, size, 0);
-        }
-
+        
         
         cout << "Loop increment" << endl;
         msgCount++;
@@ -68,6 +86,8 @@ int main() {
     strcpy(msg.greeting,"Terminate");
     msgsnd(qid,(struct buf *)&msg, size, 0);
     msgsnd(qid,(struct buf *)&msg, size, 0);
+    msg.mtype = 777;//endcode for 997
+    msgsnd(qid,(struct buf *)&msg, size ,0);
     cout << getpid() << ": now exits" << endl;
     
     

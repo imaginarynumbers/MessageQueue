@@ -22,6 +22,7 @@ int main()
     struct buf {
         long mtype;
         char greeting[50];
+        int sid;
     } msg;          // buf object 'msg'
     
     int size = sizeof(msg)-sizeof(long);
@@ -29,30 +30,40 @@ int main()
     int randomNumber;
     int totalMessages = 0;
     bool status = true;
+    
     cout << getpid() << " sender257 ready!" << endl;
-
+    //waits for r2
+    msgrcv(qid, (struct buf *)&msg,size,21,0);
     while (status) {
         cout << "Total Messages = " << totalMessages <<endl;
         randomNumber = rand() * INT_MAX;
         cout << "Random number = " << randomNumber << endl;
+        
         if (randomNumber % 257 == 0){
             msg.mtype = 257;
-            strcpy(msg.greeting,"257 had an accident");
-            msgsnd(qid, (struct msgbuf *)&msg, size, 0);
-            totalMessages++;
-            cout << "Message " << totalMessages <<randomNumber<< endl;
-        }
-        
-        totalMessages++;
-        if (totalMessages > 10000){
+            msg.sid = 257;
+            strcpy(msg.greeting,"T-257 had an accident");
+            cout<< msg.greeting << endl;
+            msgsnd(qid, (struct buf *)&msg, size, 0);
+            msgrcv(qid, (struct buf *)&msg,size,667,0);//receives message from r2
             break;
         }
+        
+        
+        /*
+        if (totalMessages > 1000000){
+            break;
+        }
+         */
     }
     
     // send terminating message to sender997
+    /*
     cout << "Teriminating 257" << endl;
     msg.mtype = 703;
+    msg.sid = 257;
     strcpy(msg.greeting, "Terminated (Sender 257)");
+     */
     msgsnd(qid, (struct msgbuf *)&msg, size, 0);
     
     // terminate sender257

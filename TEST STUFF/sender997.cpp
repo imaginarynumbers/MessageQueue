@@ -18,6 +18,7 @@ int main() {
     struct buf {
 		long mtype;
 		char greeting[50];
+        int sid;
     };
 	
     buf msg;
@@ -49,13 +50,22 @@ int main() {
     //verification of message
     msgrcv(qid, (struct msgbuf *)&msg, size, 210, 0);
     cout << getpid() << ": " << msg.greeting << endl;
-    int messageTotal = 0;
+    
+    
 	while (status997){
-        cout << messageTotal << " = Message Total" << endl;
+        
         cout << "Sending message to : " << qid<< " with mtype : " << msg.mtype << endl;
-        msg.mtype = 997;//message receiver2
+        //msg to rec2
+        msg.mtype = 257;
+        msg.sid = 997;
         strcpy(msg.greeting, "997 Reporting for duty");//dummy message
         msgsnd(qid, (struct buf *)&msg, size,0);
+        //message to rec1
+        msg.mtype = 251;
+        msg.sid = 997;
+        strcpy(msg.greeting, "997 Reporting for duty");//dummy message
+        msgsnd(qid, (struct buf *)&msg, size,0);
+
         
         cout << "Generating Random Event" << endl;
         randomNum = (rand() % 10000 + 1);
@@ -65,26 +75,25 @@ int main() {
         if (randomNum < 10){
             
             cout << "KILL CHANCE SUCCESS = " << randomNum << endl;
-            msg.mtype = 997;
-            strcpy(msg.greeting,"This messenger says bye");
+            msg.mtype = 251;
+            msg.sid = 997;
+            strcpy(msg.greeting,"T his messenger says bye");
             msgsnd(qid, (struct buf *)&msg, size, 0);
-            cout << "Attempting to receive my kill orders" << endl;
-            msgrcv(qid,(struct buf *)&msg,size,405,0);
-            cout << "Kill orders =(" << endl;
+            msg.mtype = 257;
+            msg.sid = 997;
+            msgsnd(qid, (struct buf *)&msg,size, 0);
+            cout << "T-Attempting to receive my kill orders" << endl;
+            msgrcv(qid,(struct buf *)&msg, size,777, 0);
+            cout << "Messenger received end, goodbye" << endl;
+            status997 = false;
+            break;
             
-            if( msg.greeting[0] == 'G' ){
-                cout << "Messenger received end, goodbye" << endl;
-                status997 = false;
-                break;
-            }
         }
         
-        messageTotal++;
+    
 	}
     
-    //once the code reaches the end, the queue is killed
-    msgrcv(qid,(struct buf *)&msg,size, 666,0);
-	msgctl(qid, IPC_RMID, NULL);
+    msgctl(qid, IPC_RMID, NULL);
     cout << qid << ": Queue destroyed" << endl;
 	//Sender 257 Terminates
 	cout << getpid() << ": now exits" << endl;
