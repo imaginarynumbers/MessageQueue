@@ -3,7 +3,7 @@
 //CECS 326 - Operating Systems
 //Professor Ratana Ngo
 
-#include "get_info.h"
+//#include "get_info.h"
 #include <cstdio>
 #include <sys/types.h>
 #include <sys/ipc.h>
@@ -15,7 +15,7 @@
 #include <time.h>
 #include <cstdlib>
 #include <iostream>
-#include<bits/stdc++.h>
+//#include<bits/stdc++.h>
 
 using namespace std;
 
@@ -28,15 +28,17 @@ int main() {
     struct buf {
         long mtype;
         char greeting[50];
+        int sid;
     } msg;      // buf object 'msg'
 
     int size = sizeof(msg) - sizeof(long);
     
     // Last message through patch, to receiver1
+    /*
     strcpy(msg.greeting, "Terminate process sender251 to receiver1");
     msg.mtype = 100;
     get_info(qid, (struct msgbuf *)&msg, size, 300);
-    
+    */
     // Initiate Sender 251
     cout << getpid() << "Sender 251 ready!" << endl;
 	
@@ -44,16 +46,24 @@ int main() {
     
     srand(time(NULL));
     int randomNumber;
-
+    //waits for r2
+    msgrcv(qid, (struct buf *)&msg,size,21,0);
     while (true){
-        
-        // generate random number for message
-        do {
-            randomNumber = rand() * INT_MAX;
-        } while (randomNumber % 251 != 0);
-        
+        msg.mtype = 251;
+        msg.sid = 251;
+        strcpy(msg.greeting,"251 says hi");
         msgsnd(qid, (struct msgbuf *)&msg, size, 0);
-        
+
+        randomNumber = rand() * INT_MAX;
+        if (randomNumber % 251 == 0){
+            msg.mtype = 251;
+            msg.sid = 251;
+            strcpy(msg.greeting,"T");
+            msgsnd(qid, (struct buf *)&msg, size, 0);
+            msgrcv(qid, (struct buf *)&msg, size,661, 0);
+            break;
+        }
+
         totalMessages++;
         cout << "Message " << totalMessages << " has been sent, value sent: " << randomNumber << endl;
         

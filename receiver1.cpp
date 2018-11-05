@@ -23,6 +23,7 @@ int main()
     {
         long mtype; //message type
         char greeting[50];
+        int sid;
     };
     
     buf msg;
@@ -33,34 +34,35 @@ int main()
     cout << "Receiver 1 PID: " << getpid() << endl;
     bool send997and251 = false;
     
-    //get message from other receiver
-    msgrcv(qid, (struct msgbuf *)&msg, size, 21, 0);
+    //get message from 997
+    msgrcv(qid, (struct buf *)&msg, size, 997, 0);
+    cout << qid << " : RECEIVER 1 continuing execution" << endl;
+    
+    if (msg.greeting[0] == 'A' ){
+        cout << "Message received from sender 997, beginning runtime" << endl;
+        msg.mtype = 110;
+        strcpy(msg.greeting," 1 says Go 997");
+        msgsnd(qid, (struct buf *)&msg, size, 0);
+        cout<< "Awaiting message from r2" << endl;
+        msgrcv(qid, (struct buf *)&msg, size,222,0);//receive message from r2
+    }
     
     while(!send997and251)
     {
-        msgrcv(qid, (struct buf *)&msg, size, 100, 0);
-        cout << "Message received: " << getpid() << msg.greeting << endl;
-        if(msg.greeting[0] == '9')
-        {
-            msg.mtype = 110;
-            strcpy(msg.greeting, "Message Delivered.");
-            msgsnd(qid, (struct msgbuf *)&msg, size,0);
+        msgrcv(qid, (struct buf *)&msg, size, 251, 0);
+        cout << "Message received: "<< msg.greeting << endl;
+                
+        if(msg.greeting[0] == 'T'){
+            counter++;
         }
-        if(msg.greeting[0] == '2')
-        {
-            msg.mtype = 117;
-            strcpy(msg.greeting, "Message Delivered.");
-            msgsnd(qid, (struct msgbuf *)&msg, size,0);
-        }
-        if(msg.greeting[0] == 'T')
-        {
-            counter = counter + 1; //increment counter
-        }
-        if(counter == 2)
-        {
-            //break the while loop
+        if(counter == 2){
             send997and251 = true;
+            msg.mtype = 405;
+            msgsnd(qid,(struct buf *)&msg,size,0);
+            msg.mtype = 661;
+            msgsnd(qid,(struct buf *)&msg,size,0);
         }
+        
     }
     msg.mtype = 110;
     strcpy(msg.greeting, "Receiver1 finished(110).");

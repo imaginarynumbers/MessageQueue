@@ -1,133 +1,104 @@
-//Jordan Dorham, Brandon Mitchell, Kacy Rowe
-//Message Queue Project
-//CECS 326 - Operating Systems
-//Professor Ratana Ngo
-
-
 #include <sys/types.h>
 #include <sys/ipc.h>
 #include <sys/msg.h>
-#include <sys/wait.h>
+#include <cstring>
 #include <iostream>
 #include <unistd.h>
+#include <sys/wait.h>
+#include <stdlib.h>
+#include <time.h>
 #include <cstdlib>
-#include <cstring>
-
 using namespace std;
 
-int main()
-{
-    int qid = msgget(ftok(".",'u'), 0); //pulls from the message queue
-    srand(time(NULL));
+int main() {
+	srand(time(NULL));
+    //int qid =  msgget(ftok(".",'u'),0);
     
-    //message buffer struct
+    int qid = msgget(ftok(".",'u'), IPC_EXCL | IPC_CREAT | 0600);
+    
     struct buf {
-        long mtype;
-        char greeting[50];
+		long mtype;
+		char greeting[50];
+        int sid;
     };
-    
+	
     buf msg;
     int size = sizeof(msg)-sizeof(long);
-    //--------------------------------------
+	cout << "SENDER 997 Enters the battle" << endl;
+    cout << "Queue created at : "<< qid <<endl;
+    bool status997 = true;
     
-    //initiate Sender 997
-    cout << getpid() << "Sender 997 is here and ready to initialize." << endl;
-    //verification boolean declarations
-    bool receiverStatus = false; //verification
-    bool receiverStatus2 = false; //verification
-    bool statusOf997 = false; //verification
-    //random number generators
-    unsigned long maximumRandomNumber = 1306784398;
-    unsigned long generateRandomNumber;
     
-    //begin messaging
-    while(receiverStatus || receiverStatus2 )
-    {
-        if(msgrcv(qid, (struct msgbuf *)&msg, size, 999, 0) == 0)
-        {
-            receiverStatus2 = true; //message received 2
-            if(msgrcv(qid, (struct msgbuf *)&msg, size, 998, 0) == 0)
-            {
-                //message received 1
-                receiverStatus = true;
-                statusOf997 = true;
-            }
-            else
-            {
-                //sends last message to receiver 1
-                strcpy(msg.greeting, "Final message sender 997 to receiver1");
-                msg.mtype = 100;
-                msgsnd(qid, (struct msgbuf *)&msg, size, 0);
-                statusOf997 = true;
-            }
-        }
-        //check if message to receiver 1 was successful
-        if(msgrcv(qid, (struct msgbuf *)&msg, size, 998, 0) == 0)
-        {
-            receiverStatus = true; //message received
-            if(msgrcv(qid, (struct msgbuf *)&msg, size, 999, 0) == 0)
-            {
-                //check if message to receiver 2 was successful
-                receiverStatus2 = true;
-                statusOf997 = true;
-            }
-            else
-            {
-                //sends last message to receiver2
-                strcpy(msg.greeting, "Final message sender 997 to receiver1");
-                msg.mtype = 997;
-                msgsnd(qid, (struct msgbuf *)&msg, size, 0);
-                statusOf997 = true;
-            }
-        }
-        //If all status check out
-        if(receiverStatus && receiverStatus2 && statusOf997)
-        {
-            //generate random number
-            generateRandomNumber = rand()%maximumRandomNumber;
-            cout << "Random number = " << generateRandomNumber; //debug purposes
-            if(generateRandomNumber < 100)
-            {
-                //last message to receiver1
-                strcpy(msg.greeting, "Terminate sender 997 to receiver1");
-                msg.mtype = 100;
-                msgsnd(qid, (struct msgbuf *)&msg, size, 0);
-                
-                //last message to receiver2
-                strcpy(msg.greeting, "Terminate sender 997 to receiver2");
-                msg.mtype = 201;
-                msgsnd(qid, (struct msgbuf *)&msg, size, 0);
-                
-                statusOf997 = true;
-            }
-            //check if message was successful
-            if(generateRandomNumber%997 == 0)
-            {
-                //message receiver 1
-                strcpy(msg.greeting, "Attempting to message receiever1 from sender 997.");
-                cout << getpid() << ":  messaging receiver1" << endl;
-                msg.mtype = 100;
-                msgsnd(qid, (struct msgbuf *)&msg, size, 0);
-                
-                //verification of message
-                msgrcv(qid, (struct msgbuf *)&msg, size, 110, 0);
-                cout << getpid() << ": " << msg.greeting << endl;
-                
-                //Attempt to message
-                strcpy(msg.greeting, "Attempting to message receiver2 from sender 997.");
-                cout << getpid() << ": messaging to receiver2" << endl;
-                msg.mtype = 997;
-                msgsnd(qid, (struct msgbuf *)&msg, size, 0);
-                
-                //verification of message
-                msgrcv(qid, (struct msgbuf *)&msg, size, 210, 0);
-                cout << getpid() << ": " << msg.greeting << endl;
-            }
-        }
-    }
-    //end of messaging, purge queue and end all tasks
-    msgctl(qid, IPC_RMID, NULL); //purge queue
-    cout << getpid() << ": now exits" << endl; //end of 997 task
-    exit(0);
+    //event chance variable
+    int randomNum;
     
+    //Send message to receiver1 with mytype 100
+    strcpy(msg.greeting, "Attempting to message receiever1 from sender 997.");
+    cout << getpid() << ":  messaging receiver1" << endl;
+    msg.mtype = 997;
+    msgsnd(qid, (struct msgbuf *)&msg, size, 0);
+    
+    //verification of message
+    msgrcv(qid, (struct msgbuf *)&msg, size, 110, 0);
+    cout << getpid() << ": " << msg.greeting << endl;
+    
+    //Attempt to message
+    strcpy(msg.greeting, "Attempting to message receiver2 from sender 997.");
+    cout << getpid() << ": messaging to receiver2" << endl;
+    msg.mtype = 997;
+    msgsnd(qid, (struct msgbuf *)&msg, size, 0);
+    
+    //verification of message
+    msgrcv(qid, (struct msgbuf *)&msg, size, 210, 0);
+    cout << getpid() << ": " << msg.greeting << endl;
+    
+    
+	while (status997){
+        
+        cout << "Sending message to : " << qid<< " with mtype : " << msg.mtype << endl;
+        //msg to rec2
+        msg.mtype = 257;
+        msg.sid = 997;
+        strcpy(msg.greeting, "997 Reporting for duty");//dummy message
+        msgsnd(qid, (struct buf *)&msg, size,0);
+        //message to rec1
+        msg.mtype = 251;
+        msg.sid = 997;
+        strcpy(msg.greeting, "997 Reporting for duty");//dummy message
+        msgsnd(qid, (struct buf *)&msg, size,0);
+
+        
+        cout << "Generating Random Event" << endl;
+        randomNum = (rand() % 10000 + 1);
+        cout << randomNum << endl;
+        
+        
+        if (randomNum < 10){
+            
+            cout << "KILL CHANCE SUCCESS = " << randomNum << endl;
+            msg.mtype = 251;
+            msg.sid = 997;
+            strcpy(msg.greeting,"T his messenger says bye");
+            msgsnd(qid, (struct buf *)&msg, size, 0);
+            msg.mtype = 257;
+            msg.sid = 997;
+            msgsnd(qid, (struct buf *)&msg,size, 0);
+            cout << "T-Attempting to receive my kill orders" << endl;
+            msgrcv(qid,(struct buf *)&msg, size,777, 0);
+            cout << "Messenger received end, goodbye" << endl;
+            status997 = false;
+            break;
+            
+        }
+        
+    
+	}
+    
+    msgctl(qid, IPC_RMID, NULL);
+    cout << qid << ": Queue destroyed" << endl;
+	//Sender 257 Terminates
+	cout << getpid() << ": now exits" << endl;
+    
+     exit(0);
 }
+
