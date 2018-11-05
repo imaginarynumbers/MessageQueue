@@ -29,6 +29,7 @@ int main()
     //--------------------------------------
     int randomNumber;
     int totalMessages = 0;
+    INT_MAX = 2147483647;
     bool status = true;
     
     cout << getpid() << " sender257 ready!" << endl;

@@ -43,7 +43,7 @@ int main() {
     cout << getpid() << "Sender 251 ready!" << endl;
 	
     int totalMessages = 0;
-    
+    int INT_MAX = 2147483647;
     srand(time(NULL));
     int randomNumber;
     //waits for r2
